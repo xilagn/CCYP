@@ -1,0 +1,46 @@
+name: Build Android APK with EAS
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm install --legacy-peer-deps
+          npx expo install --fix --  --legacy-peer-deps
+          npx expo install react-native-web react-dom @expo/metro-runtime --legacy-peer-deps
+      
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+      
+      - name: Configure EAS
+        run: eas config --platform android
+      
+      - name: Build Android APK with EAS
+        run: eas build --platform android --local --profile preview
+        env:
+          EAS_BUILD_API_KEY: ${{ secrets.EAS_BUILD_API_KEY }}
+      
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app
+          path: '*.apk'
+          retention-days: 30

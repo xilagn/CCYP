@@ -1,0 +1,107 @@
+{
+  "expo": {
+    "name": "蓝牙串口工具",
+    "slug": "bluetooth-serial-terminal",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "bluetooth-serial",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bluetoothserial.terminal",
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "访问蓝牙设备进行串口通信",
+        "NSBluetoothPeripheralUsageDescription": "连接蓝牙串口模块",
+        "NSLocationWhenInUseUsageDescription": "访问附近的设备需要位置信息",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "持续访问位置信息以检测附近的设备",
+        "NSPhotoLibraryUsageDescription": "访问照片和视频",
+        "NSPhotoLibraryAddUsageDescription": "保存照片和视频",
+        "NSMicrophoneUsageDescription": "使用麦克风进行音频录制",
+        "NSContactsUsageDescription": "访问通讯录",
+        "NSPhoneUsageDescription": "访问电话功能",
+        "NSAppleMusicUsageDescription": "访问音乐与音频",
+        "UIBackgroundModes": [
+          "bluetooth-central"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0a0a0f"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.bluetoothserial.terminal",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_WIFI_STATE",
+        "CHANGE_WIFI_STATE",
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_AUDIO",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "RECORD_AUDIO",
+        "READ_CONTACTS",
+        "WRITE_CONTACTS",
+        "CALL_PHONE",
+        "READ_PHONE_STATE",
+        "READ_PHONE_NUMBERS",
+        "ACCESS_NOTIFICATION_POLICY",
+        "QUERY_ALL_PACKAGES",
+        "READ_APP_BADGE",
+        "READ_DEVICE_IDENTIFIERS",
+        "WAKE_LOCK",
+        "BLUETOOTH_PRIVILEGED",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ],
+      "usesCleartextTraffic": true,
+      "networkSecurityConfig": "@xml/network_security_config",
+      "allowNativeHeapPointerTagging": false,
+      "foregroundService": {
+        "foregroundServiceType": "mediaPlayback"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-dev-client",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0a0a0f"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      "expo-audio",
+      "expo-video"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "69785045-755a-41d9-9dc3-a93361fe460b"
+      }
+    }
+  }
+}
