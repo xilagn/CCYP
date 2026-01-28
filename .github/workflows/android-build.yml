@@ -1,5 +1,6 @@
-name: Build Android (No Expo)
+name: Build Android Debug
 
+# 触发条件：推送到main分支 / 向main分支发起PR（可根据需求调整）
 on:
   push:
     branches: [main]
@@ -7,49 +8,87 @@ on:
     branches: [main]
 
 jobs:
-  build-android:
+  build-android-debug:
     runs-on: ubuntu-latest
+    timeout-minutes: 30 # Debug包构建更快，缩短超时时间
     steps:
-      - name: Checkout code
+      ###########################################
+      # 1. 拉取仓库代码（修复浅克隆问题）
+      ###########################################
+      - name: Checkout repository code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 拉取完整仓库历史，避免文件扫描异常
+          ref: ${{ github.ref }}
 
+      ###########################################
+      # 2. 调试：打印目录结构（可选，排查文件缺失）
+      ###########################################
+      - name: Debug - List project files
+        run: |
+          echo "=== 根目录文件 ==="
+          ls -la
+          echo "=== Android目录文件 ==="
+          ls -la android/
+          echo "=== Gradle Wrapper目录 ==="
+          ls -la android/gradle/wrapper/
+
+      ###########################################
+      # 3. 配置JDK 17（修复Gradle缓存扫描问题）
+      ###########################################
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+          cache: 'gradle'
+          # 手动指定Gradle文件路径，解决缓存扫描失败
+          cache-dependency-path: |
+            android/build.gradle
+            android/app/build.gradle
+            android/gradle-wrapper.properties
+            gradle.properties
 
-      - name: Set up Node.js
+      ###########################################
+      # 4. 配置Node.js环境
+      ###########################################
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn' # 若用npm则改为cache: 'npm'
+          cache: 'yarn' # 用npm则改为 cache: 'npm'
+          cache-dependency-path: |
+            package.json
+            yarn.lock # npm改为 package-lock.json
 
-      - name: Install dependencies
+      ###########################################
+      # 5. 安装项目依赖
+      ###########################################
+      - name: Install project dependencies
         run: |
-          yarn install # 或 npm install
-          cd android && ./gradlew clean # 清理缓存
+          # 安装Node依赖（npm需改为 npm ci）
+          yarn install --frozen-lockfile
+          
+          # 进入Android目录，修复Gradle执行权限
+          cd android
+          chmod +x ./gradlew
+          ./gradlew clean # 清理旧构建产物
 
-      - name: Decode Android Keystore
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE }}
+      ###########################################
+      # 6. 构建Android Debug包（核心步骤）
+      ###########################################
+      - name: Build Android Debug APK
         run: |
-          echo $ANDROID_KEYSTORE_BASE64 | base64 --decode > android/app/release.keystore
+          cd android
+          # 构建Debug包（无需签名，React Native默认带debug签名）
+          ./gradlew assembleDebug --stacktrace
 
-      - name: Configure gradle.properties
-        run: |
-          echo "MYAPP_RELEASE_STORE_FILE=release.keystore" >> android/gradle.properties
-          echo "MYAPP_RELEASE_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> android/gradle.properties
-          echo "MYAPP_RELEASE_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/gradle.properties
-          echo "MYAPP_RELEASE_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/gradle.properties
-
-      - name: Build Release APK
-        run: cd android && ./gradlew assembleRelease # 打包APK（若要AAB则改为 bundleRelease）
-
-      - name: Upload APK Artifact
+      ###########################################
+      # 7. 上传Debug包产物
+      ###########################################
+      - name: Upload Android Debug Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
-          # 若打包AAB，路径改为：android/app/build/outputs/bundle/release/app-release.aab
+          name: android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7 # Debug包保留7天即可
